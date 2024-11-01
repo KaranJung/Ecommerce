@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Himalayan Monal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9fafc;
+            color: #333;
+        }
+
+        /* Header Styling */
+        header {
+            background: linear-gradient(45deg, #006c8f, #007b99);
+            color: #fff;
+            padding: 20px 50px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            header .logo {
+                font-size: 1.5em;
+                font-weight: 700;
+                color: #fff;
+                text-decoration: none;
+            }
+
+        nav a {
+            color: #fff;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+            nav a:hover {
+                color: #ffd700;
+            }
+
+        /* Cart Section */
+        .cart {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+            .cart h2 {
+                margin-bottom: 20px;
+                color: #006c8f;
+                text-align: center;
+            }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+            .cart-item h3 {
+                font-size: 1.2em;
+                flex: 1 1 40%;
+            }
+
+            .cart-item .quantity {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .cart-item .quantity input {
+                    width: 50px;
+                    text-align: center;
+                }
+
+            .cart-item .subtotal {
+                font-weight: bold;
+                color: #006c8f;
+                flex: 1 1 20%;
+                text-align: right;
+            }
+
+            .cart-item button {
+                background-color: #006c8f;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+                .cart-item button:hover {
+                    background-color: #007b99;
+                }
+
+        .total {
+            font-size: 1.5em;
+            margin-top: 20px;
+            text-align: right;
+            color: #006c8f;
+            font-weight: bold;
+        }
+
+        .empty-cart {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.2em;
+            color: #777;
+        }
+
+        .buy-button {
+            display: block;
+            background-color: #007b99;
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+            margin: 20px auto 0;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .buy-button:hover {
+                background-color: #006c8f;
+            }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(45deg, #006c8f, #007b99);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+            footer p {
+                margin: 8px 0;
+                font-size: 0.9em;
+            }
+
+        @media (max-width: 600px) {
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+                .cart-item .quantity, .cart-item .subtotal, .cart-item button {
+                    text-align: left;
+                    margin-top: 10px;
+                }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a class="logo">🛍️ Himalayan Monal</a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="product.html">Products</a>
+            <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+
+    <section class="cart">
+        <h2>Your Shopping Cart</h2>
+        <div id="cart-items"></div>
+        <div class="total" id="cart-total"></div>
+        <div class="empty-cart" id="empty-cart-message"></div>
+        <button class="buy-button" onclick="proceedToCheckout()">Buy Now</button>
+    </section>
+
+    <footer>
+        <p>&copy; Himalayan Monal. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
+
+        function displayCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            const cartTotalDiv = document.getElementById('cart-total');
+            const emptyCartMessageDiv = document.getElementById('empty-cart-message');
+
+            cartItemsDiv.innerHTML = '';
+            emptyCartMessageDiv.innerHTML = '';
+
+            if (cart.length === 0) {
+                emptyCartMessageDiv.textContent = 'Your cart is empty.';
+                document.querySelector(".buy-button").style.display = 'none';
+            } else {
+                let total = 0;
+                cart.forEach((item, index) => {
+                    const subtotal = item.price * item.quantity;
+                    total += subtotal;
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('cart-item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <div class="quantity">
+                            <button onclick="changeQuantity(${index}, -1)">-</button>
+                            <input type="text" value="${item.quantity}" readonly />
+                            <button onclick="changeQuantity(${index}, 1)">+</button>
+                        </div>
+                        <div class="subtotal">Rs. ${subtotal.toFixed(2)}</div>
+                        <button onclick="confirmRemove(${index})">Remove</button>
+                    `;
+                    cartItemsDiv.appendChild(itemDiv);
+                });
+                cartTotalDiv.textContent = `Total: Rs. ${total.toFixed(2)}`;
+                document.querySelector(".buy-button").style.display = 'block';
+            }
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            cartCount.textContent = cart.length;
+        }
+
+        function changeQuantity(index, delta) {
+            cart[index].quantity = Math.max(1, cart[index].quantity + delta);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function confirmRemove(index) {
+            if (confirm('Are you sure you want to remove this item from your cart?')) {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                displayCart();
+            }
+        }
+
+        function proceedToCheckout() {
+            if (isLoggedIn) {
+                alert("Proceeding to checkout...");
+                // Add checkout functionality here
+            } else {
+                alert("Please log in to complete your purchase.");
+                window.location.href = "customer.html";
+            }
+        }
+
+        // Display cart items on page load
+        displayCart();
+    </script>
+
+</body>
+</html>

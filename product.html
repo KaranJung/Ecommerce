@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog - Himalayan Monal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #006c8f;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 50px;
+        }
+
+            header .logo {
+                font-size: 1.8em;
+                font-weight: 700;
+                text-decoration: none;
+                color: #fff;
+            }
+
+        nav a {
+            color: #fff;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+            nav a:hover {
+                color: #ffd700;
+            }
+
+        /* Search and Filter */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 50px;
+        }
+
+        .search-bar {
+            flex: 2;
+            margin-right: 20px;
+        }
+
+            .search-bar input {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+        .filter {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+            .filter label {
+                margin-right: 10px;
+            }
+
+            .filter input[type="range"] {
+                width: 100%;
+            }
+
+        .sort {
+            margin-left: 20px;
+        }
+
+            .sort select {
+                padding: 5px;
+            }
+
+        /* Product Grid */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+            .product-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            }
+
+            .product-card img {
+                width: 100%;
+                height: 150px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                object-fit: cover;
+            }
+
+            .product-card h3 {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+                color: #333;
+            }
+
+            .product-card p {
+                color: #777;
+                font-size: 0.9em;
+                margin-bottom: 15px;
+                flex-grow: 1;
+            }
+
+            .product-card .price {
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #006c8f;
+                margin-bottom: 15px;
+            }
+
+            .product-card button {
+                padding: 10px 20px;
+                background-color: #006c8f;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1em;
+                transition: background-color 0.3s, transform 0.2s;
+            }
+
+                .product-card button:hover {
+                    background-color: #007b99;
+                    transform: scale(1.05);
+                }
+
+        /* Notification Styles */
+        .notification {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+            z-index: 10;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #006c8f;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+            footer p {
+                margin: 8px 0;
+                font-size: 0.9em;
+            }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a class="logo">🛍️ Himalayan Monal</a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="product.html">Products</a>
+            <a href="customer.html">Customer</a>
+            <a href="cart.html" id="cart-link">Cart (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="controls">
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Search products..." oninput="filterProducts()">
+            </div>
+            <div class="filter">
+                <label for="priceRange">Price Range:</label>
+                <input type="range" id="priceRange" min="0" max="150" value="150" oninput="updatePriceLabel(this.value)">
+                <span id="priceLabel">0 - 150</span>
+            </div>
+            <div class="sort">
+                <label for="sortSelect">Sort by:</label>
+                <select id="sortSelect" onchange="sortProducts()">
+                    <option value="default">Default</option>
+                    <option value="low-to-high">Price: Low to High</option>
+                    <option value="high-to-low">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <section class="products" id="product-list">
+            <div class="product-card" data-price="49" data-name="Product 1">
+                <img src="images/wood.jpg" alt="Product 1">
+                <h3>Product 1</h3>
+                <p>High-quality product with amazing features.</p>
+                <div class="price">Rs.49</div>
+                <button onclick="addToCart('Product 1', 49, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <!-- Original Products -->
+            <div class="product-card" data-price="49" data-name="Hammer">
+                <img src="images/hammer.jpg" alt="Hammer">
+                <h3>Hammer</h3>
+                <p>Durable steel hammer with ergonomic grip for comfort and safety.</p>
+                <div class="price">Rs.49</div>
+                <button onclick="addToCart('Hammer', 49, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="89" data-name="Power Drill">
+                <img src="images/Drill.jpg" alt="Power Drill">
+                <h3>Power Drill</h3>
+                <p>High-powered cordless drill with multiple speed settings for precision.</p>
+                <div class="price">Rs.89</div>
+                <button onclick="addToCart('Power Drill', 89, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="29" data-name="Tape Measure">
+                <img src="images/tape.jpg" alt="Tape Measure">
+                <h3>Tape Measure</h3>
+                <p>Sturdy, retractable tape measure with metric and imperial measurements.</p>
+                <div class="price">Rs.29</div>
+                <button onclick="addToCart('Tape Measure', 29, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="39" data-name="Screwdriver Set">
+                <img src="https://via.placeholder.com/250?text=Screwdriver+Set" alt="Screwdriver Set">
+                <h3>Screwdriver Set</h3>
+                <p>Multi-purpose screwdriver set with interchangeable heads for versatile use.</p>
+                <div class="price">Rs.39</div>
+                <button onclick="addToCart('Screwdriver Set', 39, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <!-- New Products -->
+            <div class="product-card" data-price="59" data-name="Adjustable Wrench">
+                <img src="https://via.placeholder.com/250?text=Adjustable+Wrench" alt="Adjustable Wrench">
+                <h3>Adjustable Wrench</h3>
+                <p>Heavy-duty adjustable wrench, perfect for a wide range of fasteners.</p>
+                <div class="price">Rs.59</div>
+                <button onclick="addToCart('Adjustable Wrench', 59, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="99" data-name="Socket Set">
+                <img src="https://via.placeholder.com/250?text=Socket+Set" alt="Socket Set">
+                <h3>Socket Set</h3>
+                <p>Complete socket set with various sizes for all your repair needs.</p>
+                <div class="price">Rs.99</div>
+                <button onclick="addToCart('Socket Set', 99, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="79" data-name="Pliers Set">
+                <img src="https://via.placeholder.com/250?text=Pliers+Set" alt="Pliers Set">
+                <h3>Pliers Set</h3>
+                <p>Three-piece plier set, includes needle nose, slip joint, and cutting pliers.</p>
+                <div class="price">Rs.79</div>
+                <button onclick="addToCart('Pliers Set', 79, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="139" data-name="Saw Blade Set">
+                <img src="https://via.placeholder.com/250?text=Saw+Blade+Set" alt="Saw Blade Set">
+                <h3>Saw Blade Set</h3>
+                <p>Premium saw blade set with sharp, durable edges for precision cutting.</p>
+                <div class="price">Rs.139</div>
+                <button onclick="addToCart('Saw Blade Set', 139, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="69" data-name="Utility Knife">
+                <img src="https://via.placeholder.com/250?text=Utility+Knife" alt="Utility Knife">
+                <h3>Utility Knife</h3>
+                <p>Rugged utility knife with retractable blade and secure grip handle.</p>
+                <div class="price">Rs.69</div>
+                <button onclick="addToCart('Utility Knife', 69, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <div class="product-card" data-price="89" data-name="Tool Organizer">
+                <img src="https://via.placeholder.com/250?text=Tool+Organizer" alt="Tool Organizer">
+                <h3>Tool Organizer</h3>
+                <p>Portable tool organizer to keep your tools neatly stored and easily accessible.</p>
+                <div class="price">Rs.89</div>
+                <button onclick="addToCart('Tool Organizer', 89, this)">Add to Cart</button>
+                <div class="notification">✓ Added to Cart!</div>
+            </div>
+
+            <!-- Additional product cards -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Himalayan Monal. All Rights Reserved.</p>
+        <p>Follow us on social media!</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            updateCartCount();
+        });
+
+        function addToCart(name, price, button) {
+            const item = { name, price };
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(cartItem => cartItem.name === name);
+
+            if (!existingItem) {
+                cart.push(item);
+                localStorage.setItem('cart', JSON.stringify(cart)); // Save updated cart to localStorage
+                updateCartCount();
+                showNotification(button);
+            } else {
+                alert(`${name} is already in the cart!`);
+            }
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            document.getElementById('cart-count').textContent = cart.length;
+        }
+
+        function showNotification(button) {
+            const notification = button.parentElement.querySelector('.notification');
+            notification.style.opacity = '1';
+            setTimeout(() => {
+                notification.style.opacity = '0';
+            }, 2000);
+        }
+
+        function filterProducts() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const priceRange = document.getElementById('priceRange').value;
+            const products = document.querySelectorAll('.product-card');
+
+            products.forEach(product => {
+                const productName = product.getAttribute('data-name').toLowerCase();
+                const productPrice = parseFloat(product.getAttribute('data-price'));
+
+                const matchesSearch = productName.includes(searchInput);
+                const matchesPrice = productPrice <= parseFloat(priceRange);
+
+                product.style.display = matchesSearch && matchesPrice ? 'block' : 'none';
+            });
+        }
+
+        function updatePriceLabel(value) {
+            document.getElementById('priceLabel').textContent = `0 - ${value}`;
+            filterProducts();
+        }
+
+        function sortProducts() {
+            const sortOption = document.getElementById('sortSelect').value;
+            const productList = document.getElementById('product-list');
+            const products = Array.from(productList.children);
+
+            products.sort((a, b) => {
+                const priceA = parseFloat(a.getAttribute('data-price'));
+                const priceB = parseFloat(b.getAttribute('data-price'));
+
+                if (sortOption === 'low-to-high') return priceA - priceB;
+                if (sortOption === 'high-to-low') return priceB - priceA;
+                return 0;
+            });
+
+            products.forEach(product => productList.appendChild(product));
+        }
+    </script>
+</body>
+
+</html>
